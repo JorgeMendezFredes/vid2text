@@ -1,0 +1,14 @@
+# Entorno virtual y cachés
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+*.log
+
+# Archivos temporales o locales
+*.mp4
+*.srt
+*.txt
+
+# Carpeta de pruebas locales (no subir a GitHub)
+test/
