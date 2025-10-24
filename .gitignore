@@ -1,14 +1,13 @@
-# Entorno virtual y cachés
 .venv/
 __pycache__/
 *.pyc
-.DS_Store
 *.log
+.DS_Store
 
-# Archivos temporales o locales
-*.mp4
-*.srt
-*.txt
-
-# Carpeta de pruebas locales (no subir a GitHub)
+# artefactos locales
 test/
+*.mp4
+
+# (opcional) si NO quieres subir salidas
+# *.srt
+# *.txt
