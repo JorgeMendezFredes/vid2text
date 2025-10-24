@@ -5,6 +5,6 @@ __pycache__/
 .DS_Store
 test/
 *.mp4
-# opcional: salidas
+# opcional:
 # *.srt
 # *.txt
