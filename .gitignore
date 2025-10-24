@@ -3,11 +3,8 @@ __pycache__/
 *.pyc
 *.log
 .DS_Store
-
-# artefactos locales
 test/
 *.mp4
-
-# (opcional) si NO quieres subir salidas
+# opcional: salidas
 # *.srt
 # *.txt
