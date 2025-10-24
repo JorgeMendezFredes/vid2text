@@ -1,0 +1,7 @@
+faster-whisper==1.2.0
+ctranslate2==4.6.0
+nvidia-cublas-cu12>=12.4,<13
+nvidia-cudnn-cu12>=9,<10
+av>=11
+tqdm>=4.66
+onnxruntime<2,>=1.14
