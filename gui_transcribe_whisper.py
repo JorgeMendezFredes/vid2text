@@ -41,7 +41,7 @@ class WhisperGUI(tk.Tk):
         frm.pack(fill="x", **pad)
 
         # Input dir
-        ttk.Label(frm, text="Carpeta de entrada (.mp4):").grid(row=0, column=0, sticky="w")
+        ttk.Label(frm, text="Carpeta de entrada (media):").grid(row=0, column=0, sticky="w")
         self.var_input = tk.StringVar()
         ent_input = ttk.Entry(frm, textvariable=self.var_input, width=70)
         ent_input.grid(row=0, column=1, sticky="ew", **pad)
@@ -69,9 +69,9 @@ class WhisperGUI(tk.Tk):
         cmb_mode.grid(row=0, column=1, sticky="w", **pad)
 
         ttk.Label(opt, text="Modelo:").grid(row=0, column=2, sticky="w")
-        self.var_model = tk.StringVar(value="small.en")
+        self.var_model = tk.StringVar(value="medium")
         cmb_model = ttk.Combobox(opt, textvariable=self.var_model, state="readonly",
-                                 values=["base.en", "small.en", "medium.en", "large-v3"], width=12)
+                                 values=["base", "small", "medium", "large-v3"], width=12)
         cmb_model.grid(row=0, column=3, sticky="w", **pad)
 
         ttk.Label(opt, text="Device:").grid(row=1, column=0, sticky="w")
@@ -81,7 +81,7 @@ class WhisperGUI(tk.Tk):
         cmb_device.grid(row=1, column=1, sticky="w", **pad)
 
         ttk.Label(opt, text="Compute:").grid(row=1, column=2, sticky="w")
-        self.var_compute = tk.StringVar(value="auto")
+        self.var_compute = tk.StringVar(value="int8_float16")
         cmb_compute = ttk.Combobox(opt, textvariable=self.var_compute, state="readonly",
                                    values=["auto", "float16", "int8", "int8_float16"], width=12)
         cmb_compute.grid(row=1, column=3, sticky="w", **pad)
@@ -91,14 +91,22 @@ class WhisperGUI(tk.Tk):
         spn_beam = ttk.Spinbox(opt, from_=1, to=10, textvariable=self.var_beam, width=5)
         spn_beam.grid(row=2, column=1, sticky="w", **pad)
 
+        ttk.Label(opt, text="Idioma:").grid(row=2, column=2, sticky="w")
+        self.var_lang = tk.StringVar(value="auto")
+        cmb_lang = ttk.Combobox(opt, textvariable=self.var_lang, state="readonly",
+                                values=["auto", "es", "en", "pt", "fr", "de"], width=8)
+        cmb_lang.grid(row=2, column=3, sticky="w", **pad)
+
         self.var_vad = tk.BooleanVar(value=False)
         chk_vad = ttk.Checkbutton(opt, text="VAD", variable=self.var_vad)
-        chk_vad.grid(row=2, column=2, sticky="w", **pad)
+        chk_vad.grid(row=3, column=0, sticky="w", **pad)
 
         self.var_overwrite = tk.BooleanVar(value=False)
         chk_over = ttk.Checkbutton(opt, text="Overwrite", variable=self.var_overwrite)
-        chk_over.grid(row=2, column=3, sticky="w", **pad)
+        chk_over.grid(row=3, column=1, sticky="w", **pad)
 
+        for r in range(4):
+            opt.rowconfigure(r, weight=1)
         for c in range(4):
             opt.columnconfigure(c, weight=1)
 
@@ -171,6 +179,7 @@ class WhisperGUI(tk.Tk):
             "--model", self.var_model.get(),
             "--device", self.var_device.get(),
             "--compute-type", self.var_compute.get(),
+            "--language", self.var_lang.get() if self.var_lang.get() != "auto" else "None",
             "--vad", "on" if self.var_vad.get() else "off",
             "--beam-size", str(self.var_beam.get()),
             "--overwrite", "true" if self.var_overwrite.get() else "false",

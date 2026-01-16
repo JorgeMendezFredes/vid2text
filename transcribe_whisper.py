@@ -28,8 +28,9 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--input", required=True, type=Path, help="Carpeta raíz con videos .mp4")
     p.add_argument("--output", required=False, type=Path, default=None, help="Carpeta de salida (default: junto al input)")
     p.add_argument("--mode", choices=["both", "txt", "srt"], default="both", help="Tipos de salida por archivo")
-    p.add_argument("--model", default="small.en", help="Modelo faster-whisper (p.ej., base.en, small.en, medium.en)")
+    p.add_argument("--model", default="small.en", help="Modelo faster-whisper (p.ej., base, small, medium, large-v3)")
     p.add_argument("--device", choices=["auto", "cpu", "cuda"], default="auto", help="Dispositivo")
+    p.add_argument("--language", default=None, help="Idioma (p.ej., es, en). None para auto-detección.")
     p.add_argument("--compute-type", default="auto", help="float16, int8, int8_float16, auto")
     p.add_argument("--vad", choices=["off", "on"], default="off", help="Voice Activity Detection")
     p.add_argument("--beam-size", type=int, default=5, help="Beam size para decodificación")
@@ -41,8 +42,8 @@ def decide_device_and_compute(device: str, compute_type: str) -> Tuple[str, str]
     if device == "auto":
         # Intento CUDA si existe, si no CPU
         try:
-            import torch  # noqa
-            if torch.cuda.is_available():  # type: ignore[attr-defined]
+            import ctranslate2
+            if ctranslate2.get_cuda_device_count() > 0:
                 dev = "cuda"
             else:
                 dev = "cpu"
@@ -60,8 +61,13 @@ def decide_device_and_compute(device: str, compute_type: str) -> Tuple[str, str]
     return dev, "int8"
 
 
-def find_mp4_files(root: Path) -> List[Path]:
-    return sorted([p for p in root.rglob("*.mp4") if p.is_file()])
+def find_media_files(root: Path) -> List[Path]:
+    extensions = {".mp4", ".m4a", ".wav", ".mp3", ".mkv", ".flac"}
+    files = []
+    for p in root.rglob("*"):
+        if p.is_file() and p.suffix.lower() in extensions:
+            files.append(p)
+    return sorted(files)
 
 
 def rel_output_paths(input_root: Path, output_root: Path, video_path: Path) -> Tuple[Path, Path]:
@@ -140,16 +146,16 @@ def main() -> int:
     t0 = time.time()
     model = WhisperModel(args.model, device=device, compute_type=compute_type)
 
-    videos = find_mp4_files(input_root)
-    if not videos:
-        print("[WARN] No se encontraron archivos .mp4.")
+    media_files = find_media_files(input_root)
+    if not media_files:
+        print("[WARN] No se encontraron archivos multimedia compatibles.")
         return 0
 
     processed = 0
     skipped = 0
     failed = 0
 
-    for vid in videos:
+    for vid in media_files:
         txt_path, srt_path = rel_output_paths(input_root, output_root, vid)
 
         need_txt = args.mode in ("both", "txt")
@@ -167,7 +173,7 @@ def main() -> int:
             full_text, segments = transcribe_file(
                 model=model,
                 video_path=vid,
-                language="en",
+                language=args.language,
                 beam_size=args.beam_size,
                 use_vad=use_vad,
             )
